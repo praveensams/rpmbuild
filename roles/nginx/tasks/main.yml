@@ -1,0 +1,32 @@
+---
+# tasks file for nginx
+
+- name: "copying the rpms"
+  copy:
+    src: "nginx.1.2.rpm"
+    dest: "/mnt/"
+
+
+- name: "installaing the nginx packages"
+  yum:
+    name: /mnt/*.rpm
+    state: present
+
+- name: copying key files
+  copy:
+    src: "{{src.item}}"
+    dest: "{{dest.item}}"
+  with_items:
+    - {src: "test.darkmatter.ae.crt", dest: "/etc/nginx/cert.crt" }
+    - {src: "test.darkmatter.ae.key", dest: "/etc/nginx/cert.key" }
+ 
+- name: configuration of nginx service
+  template:
+    src: "nginx.conf.j2"
+    dest: "/etc/nginx/nginx.conf"
+  notify: restart
+
+- name: Starting the service
+  service:
+    name: "nginx"
+    state: "started"
